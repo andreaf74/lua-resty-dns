@@ -3,7 +3,6 @@
 
 -- local socket = require "socket"
 local bit = require "bit"
-local udp = ngx.socket.udp
 local rand = math.random
 local char = string.char
 local byte = string.byte
@@ -18,7 +17,6 @@ local lshift = bit.lshift
 local insert = table.insert
 local concat = table.concat
 local re_sub = ngx.re.sub
-local tcp = ngx.socket.tcp
 local log = ngx.log
 local DEBUG = ngx.DEBUG
 local unpack = unpack
@@ -113,6 +111,8 @@ function _M.new(class, opts)
     local timeout = opts.timeout or 2000  -- default 2 sec
 
     local n = #servers
+    local udp = opts.udp or ngx.socket.udp
+    local tcp = opts.tcp or ngx.socket.tcp
 
     local socks = {}
 
@@ -857,7 +857,7 @@ function _M.query(self, qname, opts, tries)
         local sock = pick_sock(self, socks)
 
         local ok
-        ok, err = sock:send(query)
+        ok, err = sock:send(concat(query, ""))
         if not ok then
             local server = _get_cur_server(self)
             err = "failed to send request to UDP server "
